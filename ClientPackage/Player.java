@@ -67,8 +67,8 @@ public class Player implements Observer, Runnable {
 		
 		// game cmds 
 		gameCmdsCurrentTurn.put("1", new FlipCards("Pick 2 cards to flip", serverSocket, serverAddress, serverPort, this)); 
-		gameCmdsCurrentTurn.put("2", new SwapDiscard("Swap with Discard deck", serverSocket, serverAddress, serverPort, this )); 
-		gameCmdsCurrentTurn.put("3", null); 
+		
+		
 		
 	} 
 	
@@ -94,9 +94,10 @@ public class Player implements Observer, Runnable {
 				}
 				break; 
 			case IN_GAME_TURN:
-				commands = null;
+				commands = gameCmdsCurrentTurn; 
+				break; 
 			case IN_GAME_NON_TURN: 
-				
+				commands = gameCmdsNonTurn; 
 				break; 
 			default: 
 				throw new RuntimeException("Undefined gamestate"); 
@@ -117,6 +118,12 @@ public class Player implements Observer, Runnable {
 	// print current menu 
 	public  void printMenu() 
 	{
+		 
+		// check if empty 
+		if (commands.size() == 0) 
+		{
+			System.out.println("WAITING TURN..."); 
+		}
 		Set<Map.Entry<String, Command>> entrySet = commands.entrySet(); 
 		for(Map.Entry<String, Command> en: entrySet) 
 		{
@@ -124,6 +131,7 @@ public class Player implements Observer, Runnable {
 			String choice = en.getKey(); 
 			System.out.println("[" + choice+ "] " + desc); 
 		} 
+		System.out.println("\n");
 	}
 
 	

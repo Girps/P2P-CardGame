@@ -21,6 +21,7 @@ public class StartGame extends Command {
 		SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
 				this.player.getPeerSocket().getInetAddress(), this.player
 				.getPeerSocket().getPort());
+		((Game)this.player.getSubject()).setState(GAMESTATE.IN_GAME_NON_TURN);  
 	}
 
 }

@@ -72,8 +72,7 @@ public class ClientPeerReceiver implements Runnable{
 					checkTurn(command,msg); 
 					break; 
 			}
-			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
-					this.socket.getInetAddress(), this.player.getPeerSocket().getPort());
+		
 		}
 		else 
 		{
@@ -81,9 +80,11 @@ public class ClientPeerReceiver implements Runnable{
 			{
 				case "START GAME":
 					// change state from IN_LOBBY into IN_GAME and add players name to the list 
-					System.out.println("Dealer started the game!" + "\nIt's" + command[1] + "turn!" ); 
 					this.game.setState(GAMESTATE.IN_GAME_NON_TURN);
+					System.out.println("Dealer started the game!" + "\nIt's " + command[1] + " turn!" ); 
 					msg += "|"+this.player.getName(); 
+					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
+							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
 					break; 
 				case "TURN": 
 					// check if current turn change state and send it away
@@ -93,21 +94,28 @@ public class ClientPeerReceiver implements Runnable{
 		}
 	}
 	
-	
+	// Check if turn packet is ment for this player 
 	private void checkTurn(String[] command,String msg) throws IOException 
 	{
-		String player = command[1];
-		if(this.player.getName().equals(player)) 
+		String playerName = command[1];
+		String allDeck = command[2]; 
+		String currDeck = command[3]; 
+		
+		System.out.println(allDeck); 
+		if(this.player.getName().equals(playerName)) 
 		{
 			// change state
-			this.player.setTurn(true);
+			System.out.println(currDeck);
+			this.game.setState(GAMESTATE.IN_GAME_TURN);
 		}
 		
 		// now send this message to others if not the dealer
 		if (!this.player.isDealer()) {
-			SocketUtil.SendMessage.sendDatagram(socket, msg, 
+			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
 					this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
 		}
+		
+		
 	}
 	
 	private void swapStock(String[] command)
@@ -120,6 +128,7 @@ public class ClientPeerReceiver implements Runnable{
 		
 	}
 	
+	// Flip packet received now edit the game state and send next turn in the packet 
 	private void flipCards(String[] command) throws IOException 
 	{
 		String playerStr, cardOneStr, cardTwoStr;
@@ -136,6 +145,10 @@ public class ClientPeerReceiver implements Runnable{
 		deck.get(cardOne).setFace(Card.FACE.UP);
 		deck.get(cardTwo).setFace(Card.FACE.UP);
 		
+		
+		// change state
+		this.game.setState(GAMESTATE.IN_GAME_NON_TURN);
+		
 		// change turn
 		this.game.nextTurn();
 		Integer currentTurn = this.game.getTurn(); 
@@ -149,7 +162,7 @@ public class ClientPeerReceiver implements Runnable{
 	}
 	
 	// start the game
-	private void startGame(String[] command) 
+	private void startGame(String[] command) throws IOException 
 	{
 		ArrayList<String> playerNames = new ArrayList<String>(); 
 		// intalize game players
@@ -159,9 +172,16 @@ public class ClientPeerReceiver implements Runnable{
 		}
 		this.game.startGame(playerNames);
 		// get current turn 
+		// get the player and their cards
+		int index = this.game.getPlayers().lastIndexOf(this.player.getName()); 
+		String allCards = this.game.getPlayersDeckString(); 
+		String currentPlayerDeck = this.game.getPlayersDeckString(index, true); 
+		// now send turn for the next player in this case it will be dealer 
+		String msg = "TURN|" + this.player.getName() + "|" + allCards + "|" + currentPlayerDeck;
+		// now send the message to peer
+		SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
+				this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
 		
-		// change player state to player turn in order to get options 
-		this.game.setState(GAMESTATE.IN_GAME_NON_TURN);
 	}
 	
 }

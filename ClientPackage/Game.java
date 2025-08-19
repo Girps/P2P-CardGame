@@ -17,7 +17,7 @@ public class Game implements Subject{
 	private Object lock = new Object(); 
 	private Integer gameId; 
 	private ArrayList<String> players; 
-	private ArrayList<Integer> scores;
+	private ArrayList<Integer> scores ;
 	private ArrayList<ArrayList<Card>> playerDeck;
 	private ArrayList<Card> stock = new Deck().getCards(); 
 	private ArrayList<Card> discard = new ArrayList<Card>(); 
@@ -27,6 +27,8 @@ public class Game implements Subject{
 	public void startGame(ArrayList<String> players) 
 	{
 		this.players=players; 
+		this.scores = new ArrayList<Integer>(); 
+		this.playerDeck = new ArrayList<ArrayList<Card>>(); 
 		for (int i =0; i < players.size(); ++i) 
 		{
 			scores.addLast(0);
@@ -48,6 +50,7 @@ public class Game implements Subject{
 		String res = ""; 
 		for (int i =0; i < playerDeck.size(); ++i) 
 		{
+			res += this.players.get(i) + "'s deck \n"; 
 			res += getPlayersDeckString(i,false) + "\n"; 
 		}
 		return res; 
@@ -119,7 +122,7 @@ public class Game implements Subject{
 	{
 		for (int i =0; i < 6; ++i) 
 		{
-			Card card = deck.removeFirst(); 
+			Card card = stock.removeFirst(); 
 			deck.add(card); 
 		}
 	}
