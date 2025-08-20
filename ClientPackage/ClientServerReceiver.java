@@ -109,13 +109,15 @@ public class ClientServerReceiver implements Runnable{
 	private void startGame(DatagramPacket packet, String[] msg) throws UnknownHostException, SocketException 
 	{
 		// get player information 
-		String isDealerStr, pportStr, neighborNameStr, neighborAddressStr, neighborPortStr; 
+		String isDealerStr, pportStr, neighborNameStr, neighborAddressStr, neighborPortStr, idStr, holesStr; 
 		
 		isDealerStr = msg[2]; 
 		pportStr= msg[3];
 		neighborNameStr= msg[4]; 
 		neighborAddressStr = msg[5]; 
 		neighborPortStr = msg[6]; 
+		idStr = msg[7]; 
+		holesStr = msg[8]; 
 		
 		boolean isDealer; 
 		int pport, neighborPort; 
@@ -131,7 +133,12 @@ public class ClientServerReceiver implements Runnable{
 		// change player state to have its neighbor and change game state to IN_LOBBY
 		this.player.setNeighbor(neighbor); 
 		this.player.setDealer(isDealer); 
-		((Game)this.player.getSubject()).setState(GAMESTATE.IN_LOBBY);
+		
+		// check if is dealer store the number of rounds, id session in the players' game object 
+		Game game = (Game)(this.player.getSubject()) ;
+		game.setId(Integer.valueOf(idStr));
+		game.setHoles(Integer.valueOf(holesStr)); 
+		game.setState(GAMESTATE.IN_LOBBY);
 		// now create a new thread to listen for portStr and datagram socket to listen to other peers 
 		DatagramSocket socket = new DatagramSocket(pport); 
 		this.executor.submit(new ClientPeerReceiver(socket, this.player)); 

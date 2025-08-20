@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.util.ArrayList;
 
 import GameObjects.Card;
+import GameObjects.Card.FACE;
 import GameObjects.Card;
 
 // Client receives packets from peer and changes state of the game 
@@ -60,8 +61,18 @@ public class ClientPeerReceiver implements Runnable{
 				case "START GAME":
 					startGame(command); // has all players now launch the game 
 					break;
+				case "GAME OVER":
+					this.game.setState(GAMESTATE.IN_LOBBY);
+					System.out.println("GAME OVER:\n" + command[2] + "\n" + "WINNER:" + command[1]); 
+					break; 
+				case "ROUND OVER": 
+					System.out.println("ROUND OVER:\n" + command[1]); 
+					// make it dealers turn 
+					restartGameRound(); 
+					break; 
 				case "FLIP":
 					flipCards(command); // flip cards 
+					break; 
 				case "STOCK":
 					swapDiscard(command); // swaps the cards
 					break; 
@@ -81,7 +92,7 @@ public class ClientPeerReceiver implements Runnable{
 				case "START GAME":
 					// change state from IN_LOBBY into IN_GAME and add players name to the list 
 					this.game.setState(GAMESTATE.IN_GAME_NON_TURN);
-					System.out.println("Dealer started the game!" + "\nIt's " + command[1] + " turn!" ); 
+					System.out.println("Dealer started the game!" ); 
 					msg += "|"+this.player.getName(); 
 					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
 							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
@@ -90,22 +101,54 @@ public class ClientPeerReceiver implements Runnable{
 					// check if current turn change state and send it away
 					checkTurn(command, msg); 
 					break; 
+				case "GAME OVER": 
+					// game is over change state 
+					this.game.setState(GAMESTATE.IN_LOBBY);
+					System.out.println("GAME OVER:\n" + command[2] + "\n" + "WINNER:" + command[1]); 
+					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
+							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+					break; 
+				case "ROUND OVER":
+					// print the current scores 
+					System.out.println("ROUND OVER:\n" + command[1]); 
+					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
+							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+					break; 
+				default: 
+					// pass the message to the next peer 
+					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
+							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+					break; 
 			}
 		}
 	}
 	
+	
+	// Create a new deck and give dealer their turn 
+	private void restartGameRound() throws IOException 
+	{
+		this.game.restartRound(); 
+		// now send a message to peer
+		sendNextTurnMessage(); 
+	}
+
 	// Check if turn packet is ment for this player 
 	private void checkTurn(String[] command,String msg) throws IOException 
 	{
 		String playerName = command[1];
 		String allDeck = command[2]; 
 		String currDeck = command[3]; 
+		String stockCard = command[4]; 
+		String discardCard = command[6]; 
 		
 		System.out.println(allDeck); 
+		System.out.println("It's " + playerName + "'s turn!"); 
 		if(this.player.getName().equals(playerName)) 
 		{
 			// change state
-			System.out.println(currDeck);
+			System.out.println( "STOCK: " + stockCard + " DISCARD: " + discardCard); 
+			System.out.println(currDeck);			
+			this.player.setCard(command[6]);
 			this.game.setState(GAMESTATE.IN_GAME_TURN);
 		}
 		
@@ -114,24 +157,128 @@ public class ClientPeerReceiver implements Runnable{
 			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
 					this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
 		}
-		
-		
 	}
 	
-	private void swapStock(String[] command)
+	
+	// send next Turn message 
+	private void sendNextTurnMessage() throws IOException 
 	{
-		
+			// change turn
+			this.game.nextTurn();
+			Integer currentTurn = this.game.getTurn(); 
+			String currentPlayer = this.game.getPlayers().get(currentTurn); 
+			String allCards = this.game.getPlayersDeckString(); 
+			String currentPlayerDeck = this.game.getPlayersDeckString(this.game.getTurn(), true);
+			Card stockCard = this.game.getStock().getFirst(); 
+			Card discardCard = this.game.getStock().getFirst(); 
+
+			String stockCardStr = stockCard.toString(); 
+			String discardCardStr = discardCard.toString(); 
+			stockCard.setFace(FACE.UP);
+			String faceUpStockCardStr = stockCard.toString(); 
+			stockCard.setFace(FACE.DOWN);
+			
+			String msg = "TURN|" + currentPlayer + "|" + allCards + "|" + currentPlayerDeck + 
+					"|" + stockCardStr + "|" + discardCardStr + "|" + faceUpStockCardStr ;
+			// now send the message to peer
+			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
+					this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
 	}
-	private void swapDiscard(String[] command) 
+	
+	// update player to swap card with card in the stock pile
+	private void swapStock(String[] command) throws IOException
 	{
-		String playerStr; 
+		String playerStr = command[1]; 
+		String card = command[2]; 
 		
+		// now swap card index 
+		Integer cardIndex = Integer.valueOf(card) - 1; 
+		Card stockCard =  this.game.getStock().removeFirst(); 
+		stockCard.setFace(FACE.UP); 
+		
+		ArrayList<String> playerList=  this.game.getPlayers();
+		Integer playerIndex = playerList.indexOf(playerStr); 
+		ArrayList<ArrayList<Card>> playersDeck= new ArrayList<ArrayList<Card>>(); 
+		playersDeck = this.game.getPlayersDeck(); 
+		Card playerCard = playersDeck.get(playerIndex).get(cardIndex);
+		playerCard.setFace(FACE.UP);
+		playersDeck.get(playerIndex).set(cardIndex, stockCard);
+		this.game.getDiscard().addFirst(playerCard);
+			
+		// check is round or game over 
+		if(!GameOrRoundOver()) 
+			sendNextTurnMessage(); 
+	}
+	
+	
+	// update player to swap card with card in discard pile 
+	private void swapDiscard(String[] command) throws IOException 
+	{
+		String playerStr = command[1]; 
+		String card = command[2]; 
+		
+		// now swap card index 
+		Integer cardIndex = Integer.valueOf(card) - 1; 
+		
+		Card discardCard = this.game.getDiscard().removeFirst();
+		Integer playerIndex =this.game.getPlayers().indexOf(playerStr); 
+		Card playerCard = this.game.getPlayersDeck().get(playerIndex).get(cardIndex); 
+		playerCard.setFace(FACE.UP);
+		this.game.getPlayersDeck().get(playerIndex).set(cardIndex, discardCard); 
+		this.game.getDiscard().addFirst(playerCard);
+		
+		// check is round or game over 
+		if(!GameOrRoundOver()) 
+			sendNextTurnMessage(); 
+
+	}
+	
+	
+	// increment the round and sc
+	public boolean GameOrRoundOver() throws IOException 
+	{
+		if(this.game.allFacedUp()) 
+		{
+			// round is over calculate the scores
+			this.game.calculateScores();
+			
+			String msg = ""; 
+			// now check if game is over or just the round 
+			this.game.incrementRound();
+			if (this.game.isGameOver()) 
+			{
+				msg += "GAME OVER|";
+				// game over get the winner and score 
+				String winner = this.game.getWinner(); 
+				String scores = this.game.getPlayerScoresStr(); 
+				msg += winner + "|" + scores;
+			}
+			else 
+			{
+				msg += "ROUND OVER|"; 
+				// round over get the current scores and round
+				String scores = this.game.getPlayerScoresStr(); 
+				msg += scores;
+			}
+			
+			// send message 
+			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, this.player.getPeerSocket()
+					.getInetAddress(), this.player
+					.getPeerSocket().getPort()
+					);
+			
+			return true; 
+		} 
+		else 
+		{
+			return false; 
+		}
 	}
 	
 	// Flip packet received now edit the game state and send next turn in the packet 
 	private void flipCards(String[] command) throws IOException 
 	{
-		String playerStr, cardOneStr, cardTwoStr;
+		String playerStr;
 		
 		playerStr = command[1]; 
 		Integer cardOne = Integer.valueOf(command[2]) - 1; 
@@ -146,19 +293,10 @@ public class ClientPeerReceiver implements Runnable{
 		deck.get(cardTwo).setFace(Card.FACE.UP);
 		
 		
-		// change state
-		this.game.setState(GAMESTATE.IN_GAME_NON_TURN);
+		// check is round or game over 
+		if(!GameOrRoundOver()) 
+			sendNextTurnMessage(); 
 		
-		// change turn
-		this.game.nextTurn();
-		Integer currentTurn = this.game.getTurn(); 
-		String currentPlayer = this.game.getPlayers().get(currentTurn); 
-		String allCards = this.game.getPlayersDeckString(); 
-		String currentPlayerDeck = this.game.getPlayersDeckString(index, true); 
-		String msg = "TURN|" + currentPlayer + "|" + allCards + "|" + currentPlayerDeck;
-		// now send the message to peer
-		SocketUtil.SendMessage.sendDatagram(socket, msg, 
-				this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
 	}
 	
 	// start the game
@@ -171,17 +309,7 @@ public class ClientPeerReceiver implements Runnable{
 			playerNames.add(command[i]); 
 		}
 		this.game.startGame(playerNames);
-		// get current turn 
-		// get the player and their cards
-		int index = this.game.getPlayers().lastIndexOf(this.player.getName()); 
-		String allCards = this.game.getPlayersDeckString(); 
-		String currentPlayerDeck = this.game.getPlayersDeckString(index, true); 
-		// now send turn for the next player in this case it will be dealer 
-		String msg = "TURN|" + this.player.getName() + "|" + allCards + "|" + currentPlayerDeck;
-		// now send the message to peer
-		SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
-				this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
-		
+		sendNextTurnMessage(); 
 	}
 	
 }

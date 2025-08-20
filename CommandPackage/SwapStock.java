@@ -20,13 +20,20 @@ public class SwapStock extends Command{
 		Integer cardOne;  
 		BufferedReader userInput  
 		= new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("STOCK: " + this.player.getFacedCard()); 
 		System.out.println("Enter card to swap with."); 
 		cardOne = Integer.valueOf(userInput.readLine()); 
 		
 		msg += this.player.getName() + "|" + cardOne; 
+		if ( 0 < cardOne && cardOne < 7) {  
 		// send message 
 		SocketUtil.SendMessage.sendDatagram(sender, msg, this.player.getPeerSocket().getInetAddress(),
 				this.player.getPeerSocket().getPort());
+		}
+		else
+		{
+			System.out.println("INVALID RANGE"); 
+		}
 	}
 
 }

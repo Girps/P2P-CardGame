@@ -206,13 +206,14 @@ public class UDPServer {
 			}
 			
 			// now add them to the game
-			this.gameList.put(this.idCounter.addAndGet(1), 
+			Integer id =  this.idCounter.addAndGet(1); 
+			this.gameList.put(id, 
 					new GameSession(this.idCounter.get(),choosenPeers, this.peerList.get(dealer),rounds) );
 			// send a message to each peer send it by TPORT 
 			for (Peer peer: choosenPeers) 
 			{
 				String currentMsg = "|"+ peer.isDealer+"|"+peer.PPORT +"|" + peer.neighbor.name + "|" 
-			+ peer.neighbor.address.getHostAddress() + "|" + peer.neighbor.PPORT; 
+			+ peer.neighbor.address.getHostAddress() + "|" + peer.neighbor.PPORT + "|" + id + "|" + rounds ; 
 				SendMessage.sendDatagram(socket, response + currentMsg, peer.address, peer.TPORT);
 			}
 		}

@@ -23,7 +23,9 @@ public class Player implements Observer, Runnable {
 	private GAMESTATE prevState = GAMESTATE.NON_GAME; 
 	private boolean isDealer = false;  
 	private boolean currentTurn = false; 
-	private boolean inital = true; 
+	private String facedUpCard = ""; 
+	
+	
 	
 	private DatagramSocket socket;
 	private DatagramSocket peerSocket; 
@@ -67,10 +69,12 @@ public class Player implements Observer, Runnable {
 		
 		// game cmds 
 		gameCmdsCurrentTurn.put("1", new FlipCards("Pick 2 cards to flip", serverSocket, serverAddress, serverPort, this)); 
-		
-		
-		
+		gameCmdsCurrentTurn.put("2", new SwapDiscard("Swap a card with Discard deck.", serverSocket, serverAddress, serverPort, this)); 
+		gameCmdsCurrentTurn.put("3", new SwapStock("Swap a card with Stock deck.", serverSocket, serverAddress, serverPort, this)); 
+
 	} 
+	
+	
 	
 	@Override 
 	public void update() {
@@ -223,5 +227,15 @@ public class Player implements Observer, Runnable {
 	public boolean getTurn() 
 	{
 		return this.currentTurn; 
+	}
+	
+	public void setCard(String card) 
+	{
+		this.facedUpCard = card; 
+	}
+	
+	public String getFacedCard() 
+	{
+		return this.facedUpCard; 
 	}
 }
