@@ -23,6 +23,7 @@ public class Player implements Observer, Runnable {
 	private GAMESTATE prevState = GAMESTATE.NON_GAME; 
 	private boolean isDealer = false;  
 	private boolean currentTurn = false; 
+	private boolean initalTurn = true; 
 	private String facedUpCard = ""; 
 	
 	
@@ -38,6 +39,7 @@ public class Player implements Observer, Runnable {
 	private HashMap<String, Command> lobbyCmdsDealer = new HashMap<String, Command>(); 
 	private HashMap<String, Command> lobbyCmdsRegular = new HashMap<String, Command>(); 
 	
+	private HashMap<String, Command> gameCmdsCurrentTurnInit = new HashMap<String, Command>(); // 4 options
 	private HashMap<String, Command> gameCmdsCurrentTurn = new HashMap<String, Command>(); // 4 options
 	private HashMap<String, Command> gameCmdsNonTurn = new HashMap<String, Command>(); // nothing
 	
@@ -54,24 +56,24 @@ public class Player implements Observer, Runnable {
 		mainCmds.put("3", new CreateGame("Start Games", socket, serverAddress, serverPort)); 
 		mainCmds.put("4", new QueryGames("Query Games", socket, serverAddress, serverPort)); 
 		mainCmds.put("5", new DeRegister("Deregister", socket, serverAddress, serverPort)); 
-		mainCmds.put("6", new ChangeToLobby("Change to Lobby",socket,serverAddress, serverPort,this.game)); 
+		mainCmds.put("6", new TerminateProgram("Terminate program",socket,serverAddress, serverPort)); 
 		
 		// Dealer only commands
-		lobbyCmdsDealer.put("1", new ChangeToNonGame("Change to Non game",socket,serverAddress,serverPort,this.game)); 
-		lobbyCmdsDealer.put("2", new Message("Send Message to peers", socket, serverAddress, serverPort, this )); 
-		lobbyCmdsDealer.put("3", new StartGame("Start game", socket, serverAddress, serverPort, this)); 
-		lobbyCmdsDealer.put("4", new EndGame("End game", socket, serverAddress, serverPort)); 
+		lobbyCmdsDealer.put("1", new Message("Send Message to peers", socket, serverAddress, serverPort, this )); 
+		lobbyCmdsDealer.put("2", new StartGame("Start game", socket, serverAddress, serverPort, this)); 
+		lobbyCmdsDealer.put("3", new EndGame("End game", socket, serverAddress, serverPort)); 
 
 		// Non dealer commands 
-		lobbyCmdsRegular.put("1", new ChangeToNonGame("Change to Non game",socket,serverAddress,serverPort,this.game)); 
-		lobbyCmdsRegular.put("2", new Message("Send Message to peers", socket, serverAddress, serverPort, this )); 
+		lobbyCmdsRegular.put("1", new Message("Send Message to peers", socket, serverAddress, serverPort, this )); 
 		commands = mainCmds; 
 		
 		// game cmds 
-		gameCmdsCurrentTurn.put("1", new FlipCards("Pick 2 cards to flip", serverSocket, serverAddress, serverPort, this)); 
-		gameCmdsCurrentTurn.put("2", new SwapDiscard("Swap a card with Discard deck.", serverSocket, serverAddress, serverPort, this)); 
-		gameCmdsCurrentTurn.put("3", new SwapStock("Swap a card with Stock deck.", serverSocket, serverAddress, serverPort, this)); 
-
+		gameCmdsCurrentTurn.put("1", new SwapDiscard("Swap a card with Discard deck.", serverSocket, serverAddress, serverPort, this)); 
+		gameCmdsCurrentTurn.put("2", new SwapStock("Swap a card with Stock deck.", serverSocket, serverAddress, serverPort, this)); 
+		
+		
+		gameCmdsCurrentTurnInit.put("1", new FlipCards("Pick 2 cards to flip", serverSocket, serverAddress, serverPort, this)); 
+		
 	} 
 	
 	
@@ -98,7 +100,16 @@ public class Player implements Observer, Runnable {
 				}
 				break; 
 			case IN_GAME_TURN:
-				commands = gameCmdsCurrentTurn; 
+				
+				// check initali turn
+				if(this.initalTurn) 
+				{ 
+					commands = gameCmdsCurrentTurnInit;
+				}
+				else
+				{
+					commands = gameCmdsCurrentTurn; 
+				}
 				break; 
 			case IN_GAME_NON_TURN: 
 				commands = gameCmdsNonTurn; 
@@ -239,5 +250,17 @@ public class Player implements Observer, Runnable {
 	public String getFacedCard() 
 	{
 		return this.facedUpCard; 
+	}
+	
+	
+	public void setInit(boolean intial) 
+	{
+		this.initalTurn = intial; 
+	}
+
+
+
+	public void setTerminate(boolean term) {
+		this.terminate = term; 
 	}
 }

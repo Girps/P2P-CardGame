@@ -45,8 +45,6 @@ public class ClientServerReceiver implements Runnable{
 				this.handleResponse(packet);
 			}
 			catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}

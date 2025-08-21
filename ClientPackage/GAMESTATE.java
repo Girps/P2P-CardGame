@@ -1,6 +1,7 @@
 package ClientPackage;
 
 public enum GAMESTATE {
+	TERMINATE,
 	NON_GAME, 
 	IN_LOBBY, 
 	IN_GAME_TURN, 

@@ -92,6 +92,7 @@ public class ClientPeerReceiver implements Runnable{
 				case "START GAME":
 					// change state from IN_LOBBY into IN_GAME and add players name to the list 
 					this.game.setState(GAMESTATE.IN_GAME_NON_TURN);
+					this.player.setInit(true);
 					System.out.println("Dealer started the game!" ); 
 					msg += "|"+this.player.getName(); 
 					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
@@ -315,6 +316,7 @@ public class ClientPeerReceiver implements Runnable{
 			playerNames.add(command[i]); 
 		}
 		this.game.startGame(playerNames);
+		this.player.setInit(true);
 		sendNextTurnMessage(); 
 	}
 	

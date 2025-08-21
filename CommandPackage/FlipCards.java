@@ -35,6 +35,7 @@ public class FlipCards extends Command{
 		if( 0 < cardOne && cardOne < 7 && 0 < cardTwo && cardTwo < 7) 
 		{
 			// end turn 
+			this.player.setInit(false); 
 			((Game)this.player.getSubject()).setState(GAMESTATE.IN_GAME_NON_TURN); 
 			
 			// now send the message 
