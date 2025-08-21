@@ -124,7 +124,7 @@ public class Player implements Observer, Runnable {
 	{
 		 
 		// check if empty 
-		if (commands.size() == 0) 
+		if (this.state == GAMESTATE.IN_GAME_NON_TURN) 
 		{
 			System.out.println("WAITING TURN..."); 
 		}
@@ -229,6 +229,8 @@ public class Player implements Observer, Runnable {
 		return this.currentTurn; 
 	}
 	
+	
+	// puts up the stock card 
 	public void setCard(String card) 
 	{
 		this.facedUpCard = card; 

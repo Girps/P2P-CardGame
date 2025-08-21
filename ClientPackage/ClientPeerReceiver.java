@@ -62,11 +62,11 @@ public class ClientPeerReceiver implements Runnable{
 					startGame(command); // has all players now launch the game 
 					break;
 				case "GAME OVER":
-					this.game.setState(GAMESTATE.IN_LOBBY);
 					System.out.println("GAME OVER:\n" + command[2] + "\n" + "WINNER:" + command[1]); 
+					this.game.setState(GAMESTATE.IN_LOBBY);
 					break; 
 				case "ROUND OVER": 
-					System.out.println("ROUND OVER:\n" + command[1]); 
+					System.out.println("ROUND OVER:" + command[2] + "\n"+ command[1]); 
 					// make it dealers turn 
 					restartGameRound(); 
 					break; 
@@ -74,10 +74,10 @@ public class ClientPeerReceiver implements Runnable{
 					flipCards(command); // flip cards 
 					break; 
 				case "STOCK":
-					swapDiscard(command); // swaps the cards
+					swapStock(command); // swaps with stock
 					break; 
 				case "DISCARD": 
-					swapStock(command); // discards the cards 
+					swapDiscard(command); // swaps with discard
 					break;
 				case "TURN": // display info and check if current turn never send it 
 					checkTurn(command,msg); 
@@ -103,14 +103,14 @@ public class ClientPeerReceiver implements Runnable{
 					break; 
 				case "GAME OVER": 
 					// game is over change state 
-					this.game.setState(GAMESTATE.IN_LOBBY);
 					System.out.println("GAME OVER:\n" + command[2] + "\n" + "WINNER:" + command[1]); 
 					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
 							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+					this.game.setState(GAMESTATE.IN_LOBBY);
 					break; 
 				case "ROUND OVER":
 					// print the current scores 
-					System.out.println("ROUND OVER:\n" + command[1]); 
+					System.out.println("ROUND OVER:" + command[2] + "\n"+ command[1]); 
 					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
 							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
 					break; 
@@ -139,7 +139,8 @@ public class ClientPeerReceiver implements Runnable{
 		String allDeck = command[2]; 
 		String currDeck = command[3]; 
 		String stockCard = command[4]; 
-		String discardCard = command[6]; 
+		String discardCard = command[5];
+		String  stockCardFaceUp=command[6]; 
 		
 		System.out.println(allDeck); 
 		System.out.println("It's " + playerName + "'s turn!"); 
@@ -148,7 +149,7 @@ public class ClientPeerReceiver implements Runnable{
 			// change state
 			System.out.println( "STOCK: " + stockCard + " DISCARD: " + discardCard); 
 			System.out.println(currDeck);			
-			this.player.setCard(command[6]);
+			this.player.setCard(stockCardFaceUp);
 			this.game.setState(GAMESTATE.IN_GAME_TURN);
 		}
 		
@@ -170,8 +171,8 @@ public class ClientPeerReceiver implements Runnable{
 			String allCards = this.game.getPlayersDeckString(); 
 			String currentPlayerDeck = this.game.getPlayersDeckString(this.game.getTurn(), true);
 			Card stockCard = this.game.getStock().getFirst(); 
-			Card discardCard = this.game.getStock().getFirst(); 
-
+			Card discardCard = this.game.getDiscard().getFirst(); 
+				
 			String stockCardStr = stockCard.toString(); 
 			String discardCardStr = discardCard.toString(); 
 			stockCard.setFace(FACE.UP);
@@ -259,6 +260,11 @@ public class ClientPeerReceiver implements Runnable{
 				// round over get the current scores and round
 				String scores = this.game.getPlayerScoresStr(); 
 				msg += scores;
+				
+				String round = this.game.getRound().toString(); 
+				String holes = this.game.getHoles().toString(); 
+				msg += "|(" + round + "/" + holes + ")"; 
+				
 			}
 			
 			// send message 

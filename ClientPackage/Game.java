@@ -32,6 +32,7 @@ public class Game implements Subject{
 		this.players=players; 
 		this.scores = new ArrayList<Integer>(); 
 		this.playerDeck = new ArrayList<ArrayList<Card>>(); 
+		this.rounds =0; 
 		Card firstDiscard = this.stock.removeFirst(); 
 		firstDiscard.setFace(FACE.UP);
 		this.discard.addFirst(firstDiscard);

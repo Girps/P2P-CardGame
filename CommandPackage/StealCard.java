@@ -27,9 +27,9 @@ public class StealCard extends Command{
 		cardOne = Integer.parseInt(userInput.readLine()); 
 		System.out.println("Pick player to steal from.");
 		playerTarget = userInput.readLine(); 
-		msg += "FLIP|"+ this.player.getName() +"|"+ cardOne + "|" +  playerTarget; 
+		msg += "STEAL"+ this.player.getName() +"|"+ cardOne + "|" +  playerTarget; 
 		// now send the message 
-		SocketUtil.SendMessage.sendDatagram(sender,msg , 
+		SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(),msg , 
 				this.player.getPeerSocket().getInetAddress(),this.player.getPeerSocket().getPort());
 	}
 

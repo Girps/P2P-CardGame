@@ -291,7 +291,7 @@ public class UDPServer {
 		
 		for (Map.Entry<String, Peer> en: peers)
 		{
-			response += en.getValue(); 
+			response += en.getValue() + "\n"; 
 		} 
 		SendMessage.sendDatagram(socket, response, packet.getAddress(), packet.getPort());
 	}
