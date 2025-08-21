@@ -82,6 +82,15 @@ public class ClientPeerReceiver implements Runnable{
 				case "TURN": // display info and check if current turn never send it 
 					checkTurn(command,msg); 
 					break; 
+				case "MESSAGE": 
+					if (!command[1].equals(this.player.getName())) 
+					{ 
+						System.out.println(command[1] + ":" + command[2]);
+						// send packet over
+						SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
+								this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+					} 
+					break; 
 			}
 		
 		}
@@ -114,6 +123,15 @@ public class ClientPeerReceiver implements Runnable{
 					System.out.println("ROUND OVER:" + command[2] + "\n"+ command[1]); 
 					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
 							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+					break;
+				case "MESSAGE": 
+					if (!command[1].equals(this.player.getName())) 
+					{ 
+						System.out.println(command[1] + ":" + command[2]);
+						// send packet over
+						SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
+								this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+					} 
 					break; 
 				default: 
 					// pass the message to the next peer 
