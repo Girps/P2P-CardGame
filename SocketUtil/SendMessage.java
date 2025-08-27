@@ -13,5 +13,7 @@ public class SendMessage {
 		byte[] data = payload.getBytes("UTF-8");
 		DatagramPacket packet = new DatagramPacket(data,data.length, address,port); 
 		sender.send(packet);
+	
+		
 	}
 }

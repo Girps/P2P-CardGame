@@ -29,7 +29,7 @@ public class ClientServerReceiver implements Runnable{
 		this.serverAddress = serverAddress;
 		this.BufferSize = 8192; 
 		this.serverPort=serverPort;
-		this.serverSocket.connect(serverAddress,serverPort);
+		//this.serverSocket.connect(serverAddress,serverPort);
 	}
 	@Override
 	public void run() {
@@ -106,9 +106,9 @@ public class ClientServerReceiver implements Runnable{
 	// Start game 
 	private void startGame(DatagramPacket packet, String[] msg) throws UnknownHostException, SocketException 
 	{
+		
 		// get player information 
 		String isDealerStr, pportStr, neighborNameStr, neighborAddressStr, neighborPortStr, idStr, holesStr; 
-		
 		isDealerStr = msg[2]; 
 		pportStr= msg[3];
 		neighborNameStr= msg[4]; 
@@ -128,19 +128,21 @@ public class ClientServerReceiver implements Runnable{
 		
 		// create the peer and datagram to connect to
 		Peer neighbor = new Peer(neighborNameStr, neighborAddress, serverPort, neighborPort);  
+		DatagramSocket socket = new DatagramSocket(pport);
 		// change player state to have its neighbor and change game state to IN_LOBBY
 		this.player.setNeighbor(neighbor); 
 		this.player.setDealer(isDealer); 
+		this.player.setPeerSocket(socket);
 		
 		// check if is dealer store the number of rounds, id session in the players' game object 
 		Game game = (Game)(this.player.getSubject()) ;
 		game.setId(Integer.valueOf(idStr));
 		game.setHoles(Integer.valueOf(holesStr)); 
 		game.setState(GAMESTATE.IN_LOBBY);
-		// now create a new thread to listen for portStr and datagram socket to listen to other peers 
-		DatagramSocket socket = new DatagramSocket(pport); 
-		this.executor.submit(new ClientPeerReceiver(socket, this.player)); 
 		
+		// now create a new thread to listen for portStr and datagram socket to listen to other peers 
+		this.executor.submit(new ClientPeerReceiver(socket, this.player)); 
+
 		
 	}
 }

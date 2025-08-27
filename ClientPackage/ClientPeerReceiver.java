@@ -51,7 +51,6 @@ public class ClientPeerReceiver implements Runnable{
 		String msg = new String(packet.getData(),0,packet.getLength(), "UTF-8");
 		// now get check
 		String[] command = msg.split("\\|"); 
-		
 		// check if current is the dealer
 		if(this.player.isDealer()) 
 		{
@@ -88,7 +87,7 @@ public class ClientPeerReceiver implements Runnable{
 						System.out.println(command[1] + ":" + command[2]);
 						// send packet over
 						SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
-								this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+								this.player.getNeighbor().address, this.player.getNeighbor().PPORT);
 					} 
 					break; 
 			}
@@ -105,7 +104,7 @@ public class ClientPeerReceiver implements Runnable{
 					System.out.println("Dealer started the game!" ); 
 					msg += "|"+this.player.getName(); 
 					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
-							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+							this.player.getNeighbor().address, this.player.getNeighbor().PPORT);
 					break; 
 				case "TURN": 
 					// check if current turn change state and send it away
@@ -130,13 +129,13 @@ public class ClientPeerReceiver implements Runnable{
 						System.out.println(command[1] + ":" + command[2]);
 						// send packet over
 						SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
-								this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+								this.player.getNeighbor().address, this.player.getNeighbor().PPORT);
 					} 
 					break; 
 				default: 
 					// pass the message to the next peer 
 					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
-							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+							this.player.getNeighbor().address, this.player.getNeighbor().PPORT);
 					break; 
 			}
 		}
@@ -175,7 +174,7 @@ public class ClientPeerReceiver implements Runnable{
 		// now send this message to others if not the dealer
 		if (!this.player.isDealer()) {
 			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
-					this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+					this.player.getNeighbor().address, this.player.getNeighbor().PPORT);
 		}
 	}
 	
@@ -202,7 +201,7 @@ public class ClientPeerReceiver implements Runnable{
 					"|" + stockCardStr + "|" + discardCardStr + "|" + faceUpStockCardStr ;
 			// now send the message to peer
 			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
-					this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+					this.player.getNeighbor().address, this.player.getNeighbor().PPORT);
 	}
 	
 	// update player to swap card with card in the stock pile

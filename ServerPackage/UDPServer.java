@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,10 +32,11 @@ public class UDPServer {
 	}
 	
 	// Start server
-	public void runServer() 
+	public void runServer() throws UnknownHostException 
 	{
-		
+		System.out.println("Server On"); 
 		byte[] buffer = new byte[bufferSize]; 
+		//InetAddress address = InetAddress.getByName("2a12:bec0:20c:1d4c::1");
 		try(DatagramSocket socket = new DatagramSocket(port))
 		{
 			while(true) 
@@ -61,6 +63,7 @@ public class UDPServer {
 			String payload = new String(packet.getData(),0,packet.getLength(),"UTF-8");
 			String[] messageSplit = payload.split("\\|"); 
 			String command = messageSplit[0]; 
+			System.out.println(command);  
 			switch(command) 
 			{
 				case "REGISTER":
@@ -257,6 +260,7 @@ public class UDPServer {
 			response += "SUCCESS";
 		}
 		response += "|"+ name; 
+		System.out.println(response); 
 		// use socket send back to client 
 		SendMessage.sendDatagram(socket,response,packet.getAddress(),packet.getPort()); 
 	}

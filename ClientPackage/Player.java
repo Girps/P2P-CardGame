@@ -199,9 +199,16 @@ public class Player implements Observer, Runnable {
 
 	public void setNeighbor(Peer neighbor) throws SocketException {
 		this.neighbor = neighbor; 
-		// create the socket
-		this.peerSocket= new DatagramSocket(); 
-		peerSocket.connect(neighbor.address, neighbor.PPORT); // connect to neighbor 
+	}
+	
+	public void setPeerSocket(DatagramSocket socket) 
+	{
+		this.peerSocket = socket; 
+	}
+	
+	public Peer getNeighbor() 
+	{
+		return this.neighbor; 
 	}
 	
 	public void setName(String name) 

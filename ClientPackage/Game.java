@@ -13,8 +13,8 @@ import GameObjects.Deck;
 public class Game implements Subject{
 	
 	private Observer player; 
-	private boolean changed; 
-	private GAMESTATE state; 
+	private volatile boolean changed; 
+	private volatile GAMESTATE state; 
 	private Object lock = new Object(); 
 	private Integer gameId; 
 	private ArrayList<String> players; 

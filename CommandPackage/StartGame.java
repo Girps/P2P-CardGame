@@ -19,8 +19,7 @@ public class StartGame extends Command {
 		// send message to every player to start the game and change current state of player
 		String msg = "START GAME|"+ this.player.getName();
 		SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
-				this.player.getPeerSocket().getInetAddress(), this.player
-				.getPeerSocket().getPort());
+				this.player.getNeighbor().address, this.player.getNeighbor().PPORT);
 		((Game)this.player.getSubject()).setState(GAMESTATE.IN_GAME_NON_TURN);  
 	}
 

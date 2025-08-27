@@ -24,8 +24,8 @@ public class Message extends Command{
 		= new BufferedReader(new InputStreamReader(System.in));
 		String input = userInput.readLine(); 
 		String msg = "MESSAGE|" + player.getName() + "|"+ input;
-		SocketUtil.SendMessage.sendDatagram(player.getPeerSocket(), msg, player.getPeerSocket().getInetAddress(), 
-				player.getPeerSocket().getPort());
+		SocketUtil.SendMessage.sendDatagram(player.getPeerSocket(), msg, player.getNeighbor().address, 
+				player.getNeighbor().PPORT);
 	}
 
 }
