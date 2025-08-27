@@ -249,7 +249,6 @@ public class ClientPeerReceiver implements Runnable{
 		// check is round or game over 
 		if(!GameOrRoundOver()) 
 			sendNextTurnMessage(); 
-
 	}
 	
 	
