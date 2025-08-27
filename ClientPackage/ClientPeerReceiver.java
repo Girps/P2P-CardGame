@@ -114,14 +114,14 @@ public class ClientPeerReceiver implements Runnable{
 					// game is over change state 
 					System.out.println("GAME OVER:\n" + command[2] + "\n" + "WINNER:" + command[1]); 
 					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
-							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+							this.player.getNeighbor().address, this.player.getNeighbor().PPORT);
 					this.game.setState(GAMESTATE.IN_LOBBY);
 					break; 
 				case "ROUND OVER":
 					// print the current scores 
 					System.out.println("ROUND OVER:" + command[2] + "\n"+ command[1]); 
 					SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
-							this.player.getPeerSocket().getInetAddress(), this.player.getPeerSocket().getPort());
+							this.player.getNeighbor().address, this.player.getNeighbor().PPORT);
 					break;
 				case "MESSAGE": 
 					if (!command[1].equals(this.player.getName())) 
@@ -286,9 +286,8 @@ public class ClientPeerReceiver implements Runnable{
 			}
 			
 			// send message 
-			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, this.player.getPeerSocket()
-					.getInetAddress(), this.player
-					.getPeerSocket().getPort()
+			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
+					this.player.getNeighbor().address, this.player.getNeighbor().PPORT
 					);
 			
 			return true; 
