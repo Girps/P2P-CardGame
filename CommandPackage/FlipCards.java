@@ -40,7 +40,7 @@ public class FlipCards extends Command{
 			
 			// now send the message 
 			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(),msg, 
-					this.player.getPeerSocket().getInetAddress(),this.player.getPeerSocket().getPort());
+					this.player.getNeighbor().address,this.player.getNeighbor().PPORT);
 		}
 		else 
 		{

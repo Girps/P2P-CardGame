@@ -31,8 +31,9 @@ public class SwapStock extends Command{
 		{  
 			((Game)this.player.getSubject()).setState(GAMESTATE.IN_GAME_NON_TURN); 
 			// send message 
-			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, this.player.getPeerSocket().getInetAddress(),
-					this.player.getPeerSocket().getPort());
+			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, this.player.getNeighbor()
+					.address,
+					this.player.getNeighbor().PPORT);
 		}
 		else
 		{

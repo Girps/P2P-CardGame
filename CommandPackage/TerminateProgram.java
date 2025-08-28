@@ -12,8 +12,6 @@ public class TerminateProgram extends Command{
 
 	public TerminateProgram(String desc, DatagramSocket sock, InetAddress server, int port ) {
 		super(desc, sock, server, port);
-		
-		
 	}
 	
 

@@ -158,8 +158,9 @@ public class ClientPeerReceiver implements Runnable{
 		String currDeck = command[3]; 
 		String stockCard = command[4]; 
 		String discardCard = command[5];
-		String  stockCardFaceUp=command[6]; 
-		
+		String stockCardFaceUp=command[6]; 
+		String gameId = command[7]; 
+		System.out.println("Game ID: " + gameId); 
 		System.out.println(allDeck); 
 		System.out.println("It's " + playerName + "'s turn!"); 
 		if(this.player.getName().equals(playerName)) 
@@ -198,7 +199,7 @@ public class ClientPeerReceiver implements Runnable{
 			stockCard.setFace(FACE.DOWN);
 			
 			String msg = "TURN|" + currentPlayer + "|" + allCards + "|" + currentPlayerDeck + 
-					"|" + stockCardStr + "|" + discardCardStr + "|" + faceUpStockCardStr ;
+					"|" + stockCardStr + "|" + discardCardStr + "|" + faceUpStockCardStr + "|" +this.player.getGameId();
 			// now send the message to peer
 			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(), msg, 
 					this.player.getNeighbor().address, this.player.getNeighbor().PPORT);

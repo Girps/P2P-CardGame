@@ -32,8 +32,9 @@ public class SwapDiscard extends Command{
 			// now send the message 
 			// set new state 
 			((Game)this.player.getSubject()).setState(GAMESTATE.IN_GAME_NON_TURN); 
-			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(),msg , 
-					this.player.getPeerSocket().getInetAddress(),this.player.getPeerSocket().getPort());
+			// now send the message 
+			SocketUtil.SendMessage.sendDatagram(this.player.getPeerSocket(),msg, 
+					this.player.getNeighbor().address,this.player.getNeighbor().PPORT);
 		}
 		else 
 		{

@@ -270,4 +270,11 @@ public class Player implements Observer, Runnable {
 	public void setTerminate(boolean term) {
 		this.terminate = term; 
 	}
+
+
+
+	public String getGameId() {
+		// TODO Auto-generated method stub
+		return ((Game)this.game).getId().toString(); 
+	}
 }

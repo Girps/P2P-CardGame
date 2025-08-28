@@ -307,6 +307,10 @@ public class Game implements Subject{
 		return this.player; 
 	}
 
+	public Integer getId() 
+	{
+		return this.gameId; 
+	}
 	
 	public void setId(Integer id)
 	{
